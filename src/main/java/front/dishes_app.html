@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dishes App</title>
+</head>
+<body>
+<h1>Menu</h1>
+<ul id="menu-list">
+    <!-- Dish names will be displayed here -->
+</ul>
+<h2>Select Dishes for Table</h2>
+<form id="select-dishes-form">
+    <label for="tableNumber">Table Number:</label>
+    <select id="tableNumber" required>
+        <!-- Populate table numbers -->
+        <option value="1">Table 1</option>
+        <option value="2">Table 2</option>
+        <option value="3">Table 3</option>
+        <option value="4">Table 4</option>
+        <option value="5">Table 5</option>
+        <option value="6">Table 6</option>
+        <option value="7">Table 7</option>
+        <option value="8">Table 8</option>
+        <option value="9">Table 9</option>
+        <option value="10">Table 10</option>
+    </select>
+
+    <label>Select Dishes:</label>
+    <div id="dish-checkboxes">
+        <!-- Populate dish checkboxes -->
+        <label><input type="checkbox" name="dishes" value="1"> Spaghetti Carbonara</label><br>
+        <label><input type="checkbox" name="dishes" value="2"> Margherita Pizza</label><br>
+        <label><input type="checkbox" name="dishes" value="3"> Grilled Salmon</label><br>
+        <label><input type="checkbox" name="dishes" value="4"> Chicken Alfredo</label><br>
+        <label><input type="checkbox" name="dishes" value="5"> Caesar Salad</label><br>
+    </div>
+
+    </select>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    // Fetch dishes and populate menu
+    fetch(`/api/dishes`)
+        .then(response => response.json())
+        .then(data => {
+            const menuList = document.getElementById('menu-list');
+            data.forEach(dish => {
+                const li = document.createElement('li');
+                li.textContent = dish.name;
+                menuList.appendChild(li);
+            });
+        });
+
+    // Handle form submission
+    const selectDishesForm = document.getElementById('select-dishes-form');
+    selectDishesForm.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const tableNumber = document.getElementById('tableNumber').value;
+        const selectedDishIds = Array.from(document.getElementById('dishes').selectedOptions)
+            .map(option => Number(option.value)); // Convert BigInt to integer
+
+        const requestData = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(selectedDishIds)
+        };
+
+        fetch(`http://localhost:63342/api/reserve/${tableNumber}/dishes`, requestData)
+            .then(response => response.text())
+            .then(message => {
+                console.log('Response:', message);
+                alert(message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+
+    });
+
+</script>
+</body>
+</html>
